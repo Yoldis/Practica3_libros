@@ -1,0 +1,17 @@
+CREATE DATABASE BibliotecaDB;
+GO
+
+USE BibliotecaDB;
+GO
+
+CREATE TABLE Libro (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Titulo NVARCHAR(255) NOT NULL,
+    Autor NVARCHAR(255) NOT NULL,
+    AnioPublicacion INT NOT NULL,
+    Genero NVARCHAR(100) NOT NULL,
+    NumeroPaginas INT NOT NULL,
+    Precio DECIMAL(18,2) NOT NULL,
+    Disponible BIT NOT NULL DEFAULT 1
+);
+GO
