@@ -65,7 +65,7 @@ namespace Practica3_libros.Controllers
             if (libroFind == null) return StatusCode(404, ReponseData("Libro no encontrado", null));
 
             libroFind.Titulo = libro.Titulo;
-            libroFind.Autor = libro.Autor;
+            libroFind.AutorId = libro.AutorId;
             libroFind.AnioPublicacion = libro.AnioPublicacion;
             libroFind.Genero = libro.Genero;
             libroFind.NumeroPaginas = libro.NumeroPaginas;
@@ -90,6 +90,32 @@ namespace Practica3_libros.Controllers
             if (ok <= 0) return StatusCode(500, ReponseData("Algo salio mal al eliinar el libro", libro));
 
             return StatusCode(204);
+        }
+
+         // #6. Devolver los autores paginados - GET
+        [HttpGet("paginados")]
+        public async Task<IActionResult> ObtenerLibrosPaginados([FromQuery] int? pagina, [FromQuery] int? tamanoPagina, [FromQuery] string? buscar, [FromQuery] string? ordenarPor, [FromQuery] string? direccion)
+        {
+            if(pagina == null || pagina == 0) return StatusCode(400, ReponseData($"La pagina debe ser mayor que cero {pagina}", null));
+            if(tamanoPagina == null || tamanoPagina == 0) return StatusCode(400, ReponseData($"El tamano debe ser mayor que cero {pagina}", null));
+            if(string.IsNullOrEmpty(buscar)) return StatusCode(400, ReponseData($"El termino de busqueda es requerido {pagina}", null));
+            if(string.IsNullOrEmpty(ordenarPor)) return StatusCode(400, ReponseData($"El campo de orden es requerido {pagina}", null));
+            if(string.IsNullOrEmpty(direccion)) return StatusCode(400, ReponseData($"La direccon del orden es requerido {pagina}", null));
+
+            var query = _context.Libro
+            .Where(a => a.Titulo.ToLower().Contains(buscar.ToLower()))
+            .Skip(((pagina ?? 1) - 1) * (tamanoPagina ?? 10))
+            .Take(tamanoPagina ?? 10);
+            
+            if(!string.IsNullOrEmpty(direccion))
+            {
+                if(direccion.Equals("desc", StringComparison.CurrentCultureIgnoreCase)) query = query.OrderByDescending(a => EF.Property<object>(a, ordenarPor));
+
+                if(direccion.Equals("asc", StringComparison.CurrentCultureIgnoreCase)) query = query.OrderBy(a => EF.Property<object>(a, ordenarPor));
+            }
+            
+            var autores = await  query.ToListAsync();
+            return StatusCode(200, ReponseData($"Libros Paginados", autores));
         }
     }
 }

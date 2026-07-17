@@ -11,11 +11,13 @@ builder.Services.AddDbContext<LibrosDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("bibliotecaDb")));
 
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseMiddleware<ValidateKeyMiddleware>();
 
 // Swagger solo en desarrollo (opcional)
 if (app.Environment.IsDevelopment())
